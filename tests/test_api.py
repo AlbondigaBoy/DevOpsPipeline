@@ -14,6 +14,7 @@ def reset_db():
     yield
     items_db.clear()
 
+
 @pytest.fixture
 async def client():
     """Create async test client."""
@@ -21,12 +22,14 @@ async def client():
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
+
 @pytest.mark.asyncio
 async def test_root(client):
     """Test root endpoint."""
     response = await client.get("/")
     assert response.status_code == 200
     assert "DevOps Pipeline Lab API" in response.json()["message"]
+
 
 @pytest.mark.asyncio
 async def test_health_check(client):
@@ -36,6 +39,7 @@ async def test_health_check(client):
     data = response.json()
     assert data["status"] == "healthy"
     assert "version" in data
+
 
 @pytest.mark.asyncio
 async def test_create_item(client):
@@ -53,6 +57,7 @@ async def test_create_item(client):
     assert data["price"] == item_data["price"]
     assert "id" in data
 
+
 @pytest.mark.asyncio
 async def test_list_items(client):
     """Test listing items."""
@@ -64,12 +69,13 @@ async def test_list_items(client):
     data = response.json()
     assert len(data) == 1
 
+
 @pytest.mark.asyncio
 async def test_get_item(client):
     """Test getting a specific item."""
     # Create an item first
     create_response = await client.post(
-     "/items/", json={"name": "Item 1", "price": 5.0}
+        "/items/", json={"name": "Item 1", "price": 5.0}
     )
     item_id = create_response.json()["id"]
 
@@ -77,32 +83,35 @@ async def test_get_item(client):
     assert response.status_code == 200
     assert response.json()["name"] == "Item 1"
 
+
 @pytest.mark.asyncio
 async def test_get_item_not_found(client):
     """Test getting a non-existent item."""
     response = await client.get("/items/999")
     assert response.status_code == 404
 
+
 @pytest.mark.asyncio
 async def test_update_item(client):
     """Test updating an item."""
     # Create an item first
     create_response = await client.post(
-     "/items/", json={"name": "Original", "price": 10.0}
+        "/items/", json={"name": "Original", "price": 10.0}
     )
     item_id = create_response.json()["id"]
 
     response = await client.put(f"/items/{item_id}", json={"name": "Updated"})
     assert response.status_code == 200
     assert response.json()["name"] == "Updated"
-    assert response.json()["price"] == 10.0 # Price unchanged
+    assert response.json()["price"] == 10.0  # Price unchanged
+
 
 @pytest.mark.asyncio
 async def test_delete_item(client):
     """Test deleting an item."""
     # Create an item first
     create_response = await client.post(
-    "/items/", json={"name": "To Delete", "price": 5.0}
+        "/items/", json={"name": "To Delete", "price": 5.0}
     )
     item_id = create_response.json()["id"]
 
@@ -112,14 +121,16 @@ async def test_delete_item(client):
     # Verify it's deleted
     get_response = await client.get(f"/items/{item_id}")
     assert get_response.status_code == 404
+
+
 @pytest.mark.asyncio
 async def test_create_item_validation_error(client):
     """Test item creation with invalid data."""
     response = await client.post(
         "/items/",
         json={
-            "name": "", # Empty name should fail
-            "price": -5, # Negative price should fail
+            "name": "",  # Empty name should fail
+            "price": -5,  # Negative price should fail
         },
     )
     assert response.status_code == 422
