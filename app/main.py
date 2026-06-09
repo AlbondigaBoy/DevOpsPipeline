@@ -11,10 +11,12 @@ app = FastAPI(
 
 app.include_router(items.router)
 
+
 @app.get("/", tags=["root"])
 async def root():
     """Root endpoint."""
     return {"message": "DevOps Pipeline Lab API", "docs": "/docs"}
+
 
 @app.get("/health", response_model=HealthCheck, tags=["health"])
 async def health_check():

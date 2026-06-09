@@ -8,15 +8,18 @@ router = APIRouter(prefix="/items", tags=["items"])
 items_db: dict[int, Item] = {}
 _id_counter = 0
 
+
 def _get_next_id() -> int:
     global _id_counter
     _id_counter += 1
     return _id_counter
 
+
 @router.get("/", response_model=list[Item])
 async def list_items():
     """Get all items."""
     return list(items_db.values())
+
 
 @router.get("/{item_id}", response_model=Item)
 async def get_item(item_id: int):
@@ -28,6 +31,7 @@ async def get_item(item_id: int):
         )
     return items_db[item_id]
 
+
 @router.post("/", response_model=Item, status_code=status.HTTP_201_CREATED)
 async def create_item(item: ItemCreate):
     """Create a new item."""
@@ -35,6 +39,7 @@ async def create_item(item: ItemCreate):
     db_item = Item(id=new_id, **item.model_dump())
     items_db[new_id] = db_item
     return db_item
+
 
 @router.put("/{item_id}", response_model=Item)
 async def update_item(item_id: int, item: ItemUpdate):
@@ -49,6 +54,7 @@ async def update_item(item_id: int, item: ItemUpdate):
     updated_item = stored_item.model_copy(update=update_data)
     items_db[item_id] = updated_item
     return updated_item
+
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_item(item_id: int):
